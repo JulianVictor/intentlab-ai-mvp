@@ -104,7 +104,8 @@ src/intentlab_ai/
                      # taxonomy.py: frozen taxonomy validation (implemented);
                      # partitions.py: deterministic splits + leakage checks (implemented)
   features/          # text normalization shared by training and inference
-  models/            # baseline and challenger estimators behind one small interface
+  models/            # baseline.py: TF-IDF + LR pipeline, trusted artifacts (implemented);
+                     # challenger (planned)
   evaluation/        # classification metrics, calibration, risk–coverage, OOS metrics, reports
   inference/         # artifact loading, Predictor, abstention policy
   api/               # FastAPI app, Pydantic request/response schemas
@@ -114,6 +115,7 @@ scripts/             # explicit CLI entry points (e.g. inspect_banking77.py)
 config/
   intent_taxonomy.json  # frozen supported/OOS intent groups (single source of truth)
   split_policy.json     # frozen partition policy: fractions, seed, algorithm, pins
+  baseline_model.json   # fixed baseline hyperparameters + pinned split manifest
 tests/               # unit and integration tests
 artifacts/           # generated model artifacts (git-ignored)
 reports/             # generated evaluation reports (small summaries may be committed)

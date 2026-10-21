@@ -5,10 +5,15 @@ A small, production-minded intent-classification project built on a subset of th
 classical TF-IDF baseline against a frozen sentence-embedding challenger and treats
 calibration, uncertainty, and abstention as primary concerns rather than afterthoughts.
 
-> **Current status: Phase 1 (data) complete.** Implemented so far: project foundation, CI,
-> verified BANKING77 ingestion, training-only EDA, the frozen intent taxonomy, and frozen
-> development partitions. There is no trained model or
-> experimental result yet. Everything below that describes models, APIs, or demos is **planned**.
+> **Current status: Phase 2 (baseline) in progress.** Implemented so far:
+>
+> - project foundation and CI
+> - verified BANKING77 ingestion and training-only EDA
+> - the frozen intent taxonomy and frozen development partitions
+> - a fixed TF-IDF + Logistic Regression baseline, evaluated on in-scope validation data only
+>
+> There is no calibration, abstention, OOS evaluation, challenger, API, or demo yet. No test
+> result exists.
 
 ## Problem statement
 
@@ -68,7 +73,7 @@ The demo calls the same FastAPI service that a programmatic client would use.
 |---|---|---|
 | 0 | Project foundation and architecture | Done |
 | 1 | Dataset preparation, EDA, validation strategy | Done |
-| 2 | TF-IDF + Logistic Regression baseline | Planned |
+| 2 | TF-IDF + Logistic Regression baseline | **In progress** (fixed baseline trained) |
 | 3 | Frozen sentence-embedding challenger | Planned |
 | 4 | Evaluation, calibration, abstention, model comparison | Planned |
 | 5 | FastAPI service and Streamlit demo | Planned |
@@ -86,6 +91,7 @@ Details, acceptance criteria, and the commit plan are in
 - [Data exploration](docs/data_exploration.md): training-split EDA findings and subset considerations
 - [Intent taxonomy](docs/intent_taxonomy.md): the frozen supported intents and out-of-scope groups
 - [Data partitions](docs/data_partitions.md): the frozen split policy, partition counts, and leakage checks
+- [Baseline model](docs/baseline_model.md): the TF-IDF + Logistic Regression design, provenance, and validation results
 
 ## Development setup (Windows PowerShell)
 
@@ -218,6 +224,28 @@ partitions:
 - **Manifest:** a deterministic, text-free membership manifest is written to
   `reports/generated/split_manifest.json` (git-ignored). Details are in
   [docs/data_partitions.md](docs/data_partitions.md).
+
+### TF-IDF + Logistic Regression baseline
+
+```powershell
+.venv\Scripts\python.exe scripts\train_baseline.py
+```
+
+- **What it does:** fits the fixed
+  [`config/baseline_model.json`](config/baseline_model.json) pipeline on `id_train` only
+  (1,276 examples), then evaluates it once on `id_validation` (275 examples).
+- **Outputs:** a verified model artifact plus metadata, written to `artifacts/baseline/`
+  (git-ignored).
+- **Development results** (validation, not test):
+
+  | Metric | Value |
+  |---|---|
+  | Macro-F1 | 0.8706 |
+  | Accuracy | 0.8727 |
+  | Weighted-F1 | 0.8710 |
+
+- **Raw scores are not calibrated probabilities.** See
+  [docs/baseline_model.md](docs/baseline_model.md).
 
 ## Planned technology
 

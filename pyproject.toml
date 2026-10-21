@@ -15,7 +15,12 @@ classifiers = [
     "Typing :: Typed",
 ]
 # Runtime dependencies are added in the phase that first needs them (see docs/development_plan.md).
-dependencies = []
+dependencies = [
+    # Phase 2: baseline model. joblib is imported directly for artifact persistence.
+    # scikit-learn is pinned to a minor series: defaults and pickles change between minors.
+    "joblib>=1.4,<2",
+    "scikit-learn>=1.9,<1.10",
+]
 
 [project.optional-dependencies]
 dev = [
@@ -63,3 +68,8 @@ python_version = "3.12"
 strict = true
 warn_unreachable = true
 files = ["src", "tests", "scripts"]
+
+[[tool.mypy.overrides]]
+# Neither package ships type information; their objects are typed as Any at our boundary.
+module = ["sklearn.*", "joblib"]
+ignore_missing_imports = true

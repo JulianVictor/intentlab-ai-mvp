@@ -1,0 +1,25 @@
+{
+  "model_name": "tfidf_logreg_baseline",
+  "config_version": "1.0.0",
+  "description": "Fixed, pre-selected initial benchmark. Not tuned; not claimed optimal.",
+  "data": {
+    "expected_split_manifest_sha256": "bdd08a94cd1b2c449254077e56cfb3902b10058c9a3dc4b41be6d9507c30e0fe",
+    "fit_partition": "id_train",
+    "evaluation_partition": "id_validation"
+  },
+  "tfidf": {
+    "lowercase": true,
+    "ngram_range": [1, 2],
+    "min_df": 2,
+    "max_df": 1.0,
+    "sublinear_tf": true,
+    "norm": "l2"
+  },
+  "logistic_regression": {
+    "C": 1.0,
+    "solver": "lbfgs",
+    "max_iter": 2000,
+    "class_weight": null,
+    "random_state": 42
+  }
+}

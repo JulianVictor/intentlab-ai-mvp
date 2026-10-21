@@ -1,6 +1,6 @@
 # Development Plan
 
-> **Status:** Phases 0 and 1 complete. All later phases are planned. A phase is "done" only when
+> **Status:** Phases 0 and 1 complete. Phase 2 in progress. All later phases are planned. A phase is "done" only when
 > its acceptance criteria are met by committed, tested code.
 
 ## Phase overview
@@ -9,7 +9,7 @@
 |---|---|---|
 | 0 | Project foundation and architecture | Done |
 | 1 | Dataset preparation, EDA, validation strategy | Done |
-| 2 | TF-IDF + Logistic Regression baseline | Planned |
+| 2 | TF-IDF + Logistic Regression baseline | In progress |
 | 3 | Frozen sentence-embedding challenger | Planned |
 | 4 | Evaluation, calibration, abstention, model comparison | Planned |
 | 5 | FastAPI inference service and Streamlit demo | Planned |
@@ -111,6 +111,20 @@ Phase 1 starts only after Phase 0 CI is in place and passing.
   versions.
 - Unit tests cover featurization, label mapping, and artifact save/load round-trip.
 - No test-split metrics are computed in this phase.
+
+**Progress**
+- Commit 2.1: fixed, pre-selected baseline (`config/baseline_model.json`) fitted on `id_train`
+  only, and data loaded from the pinned split manifest.
+  - Validation results: macro-F1 0.8706, accuracy 0.8727, weighted-F1 0.8710 on
+    `id_validation` (n = 275).
+  - Artifact: trusted (checksum- and version-verified), with full provenance metadata.
+  - Repeat runs gave byte-identical metrics.
+  - Train/test leakage-audit procedure pre-registered (protocol Appendix A) (done).
+  - See [baseline_model.md](baseline_model.md).
+- No hyperparameter grid has been searched yet. If one is used, it must be declared before it
+  is run, and it is searched on `id_train` / `id_validation` only.
+- Next, Commit 2.2: per-class metrics, confusion matrix, bootstrap intervals, and error
+  analysis on `id_validation`.
 
 ## Phase 3: Frozen sentence-embedding challenger
 
@@ -236,10 +250,12 @@ Small, atomic commits. Each one leaves the repository in a passing state.
    Amendment 1)
 
 **Phase 2**
-9. `feat(features): add shared text normalization`
-10. `feat(models): add TF-IDF logistic regression baseline`
-11. `feat(models): add artifact manifest and save/load`
-12. `feat(train): add baseline training CLI with validation report`
+9. `feat(ml): implement TF-IDF logistic regression baseline` (pipeline, manifest loader,
+   trusted artifact, training CLI, leakage-audit appendix)
+10. `feat(eval): add baseline validation analysis` (per-class metrics, confusion matrix,
+    bootstrap CIs)
+11. (reserved: pre-declared baseline hyperparameter grid, if adopted)
+12. (reserved)
 
 **Phase 3**
 13. `build: add sentence-transformers dependency`

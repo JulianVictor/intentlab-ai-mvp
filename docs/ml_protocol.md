@@ -149,6 +149,7 @@ Rules:
     specified leakage audit. Its procedure will be committed before final evaluation, and the
     audit will run only after all experimental choices are frozen.
   - Its findings will be reported alongside the final test results.
+  - The exact procedure is pre-registered in [Appendix A](#appendix-a-traintest-leakage-audit).
 - **What Phase 1 did instead:** it enforces duplicate protection **within** the development
   partitions only, using normalized-text grouping (see [data_partitions.md](data_partitions.md)).
 
@@ -260,3 +261,47 @@ neural embeddings is justified. Without it, any challenger score has no referenc
 - Always report validation and test results separately, and label them as such.
 - Report negative or null results (for example, the challenger not beating the baseline) as
   plainly as positive ones.
+
+## Appendix A. Train/test leakage audit
+
+*Pre-registered on 2026-10-21, before any model was fitted. This appendix narrows Amendment 1.
+It changes no taxonomy, split policy, metric, or model-selection rule.*
+
+1. **When it runs.** The audit runs exactly once:
+   - after the model, its hyperparameters, the calibrator, and the abstention-threshold rule are
+     frozen and committed;
+   - before any final test metric is computed.
+2. **What is compared.** The comparison sides are:
+   - **Development side:** every record in the four development partitions (`id_train`,
+     `id_validation`, `id_calibration`, `oos_validation`).
+   - **Test side:** the scored official test records, meaning the supported intents and the
+     OOS-final-test intents.
+3. **Duplicate criteria.** There are two:
+   - **Exact:** the original texts are identical, with no normalization.
+   - **Normalized:** the texts are identical after NFKC, case folding, and whitespace collapsing.
+     This is the same function used for the development partitions
+     (`intentlab_ai.data.eda.normalize_for_duplicates`).
+
+   No near-duplicate criterion is pre-registered. Near-duplicates are therefore neither used for
+   exclusion nor reported. This narrows the near-duplicate wording in Amendment 1.
+4. **Output is aggregate-only.** The audit reports overlap counts for each criterion, each
+   development partition, and each intent. It does not report test texts or test-level
+   predictions. Its output is never used for model selection, hyperparameters, the taxonomy,
+   calibration, or thresholds.
+5. **Predetermined response.**
+   - **No overlap:** final scoring proceeds unchanged.
+   - **Overlap found:** each matched development record is removed from the partition it is in.
+     - There is no re-split, and no other record moves.
+     - Test records are never removed or altered.
+   - **Refitting after exclusions:** the frozen procedure is re-run on the reduced partitions.
+     - The same configs and seed are used.
+     - The classifier is refit on the reduced `id_train`, and the calibrator on the reduced
+       `id_calibration`.
+     - The abstention threshold is re-derived on the reduced validation partitions by the
+       already-frozen rule.
+     - Final test metrics are computed only after this refit.
+   - **A class would become empty:** if exclusions would leave any supported intent with no
+     record in an ID partition, final scoring stops. A reviewed protocol amendment is required
+     before any test metric is computed.
+6. **No feedback from test results.** No test-set performance result may guide hyperparameters,
+   the class taxonomy, calibration, or threshold selection, whether before or after the audit.
