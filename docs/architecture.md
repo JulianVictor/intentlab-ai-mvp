@@ -19,7 +19,7 @@
 ```text
                     OFFLINE (developer machine / CI)
 ┌─────────────────────────────────────────────────────────────────────┐
-│  Hugging Face BANKING77 ──► data prep ──► splits (train/val/calib)   │
+│  PolyAI BANKING77 CSVs ───► data prep ──► splits (train/val/calib)   │
 │                                   │            official test (held)  │
 │                                   ▼                                  │
 │                    train baseline / challenger                       │
@@ -44,7 +44,10 @@
 
 ## 3. Offline training and evaluation flow
 
-1. **Load.** Download BANKING77 from Hugging Face at a pinned dataset revision.
+1. **Load.** On explicit request, download the official BANKING77 `train.csv`/`test.csv`
+   from the PolyAI GitHub repository at a pinned commit. Verify the SHA-256 checksums, cache the
+   files in `data/raw/banking77/` (git-ignored), and parse them into typed `BankingExample`
+   records. *(Implemented: `intentlab_ai.data.banking77`, `scripts/inspect_banking77.py`.)*
 2. **Select.** Choose the supported intent subset and the out-of-scope (OOS) intents according to
    the rule in [ml_protocol.md](ml_protocol.md). Both lists are saved in a versioned config file.
 3. **Split.** Deterministically split the official *train* split into train, validation, and
@@ -90,12 +93,14 @@ project has no database.
 
 ## 5. Planned package boundaries (src layout)
 
-The package will be scaffolded in Phase 0, Commit 2. The intended structure is:
+The package was scaffolded in Phase 0. The intended structure is below; only the parts
+marked as implemented exist so far.
 
 ```text
 src/intentlab_ai/
   config.py          # typed settings: paths, seeds, dataset revision, class lists
-  data/              # loading, subset selection, splitting, validation checks
+  data/              # banking77.py: verified raw ingestion (implemented);
+                     # subset selection, splitting, validation checks (planned)
   features/          # text normalization shared by training and inference
   models/            # baseline and challenger estimators behind one small interface
   evaluation/        # classification metrics, calibration, risk–coverage, OOS metrics, reports
@@ -103,6 +108,7 @@ src/intentlab_ai/
   api/               # FastAPI app, Pydantic request/response schemas
 app/
   streamlit_app.py   # demo UI; talks to the API over HTTP only
+scripts/             # explicit CLI entry points (e.g. inspect_banking77.py)
 tests/               # unit and integration tests
 artifacts/           # generated model artifacts (git-ignored)
 reports/             # generated evaluation reports (small summaries may be committed)

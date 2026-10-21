@@ -1,14 +1,14 @@
 # Development Plan
 
-> **Status:** Phase 0 in progress. All other phases are planned. A phase is "done" only when
+> **Status:** Phase 0 complete. Phase 1 in progress. All later phases are planned. A phase is "done" only when
 > its acceptance criteria are met by committed, tested code.
 
 ## Phase overview
 
 | Phase | Title | Status |
 |---|---|---|
-| 0 | Project foundation and architecture | In progress |
-| 1 | Dataset preparation, EDA, validation strategy | Planned |
+| 0 | Project foundation and architecture | Done |
+| 1 | Dataset preparation, EDA, validation strategy | In progress |
 | 2 | TF-IDF + Logistic Regression baseline | Planned |
 | 3 | Frozen sentence-embedding challenger | Planned |
 | 4 | Evaluation, calibration, abstention, model comparison | Planned |
@@ -36,8 +36,8 @@ code.
 - Commit 1: architecture, ML protocol, and development plan docs (done).
 - Commit 2: package scaffold, `pyproject.toml`, `.gitignore`/`.gitattributes`, Ruff/mypy/pytest
   configuration, and the smoke test. All local quality gates pass (done).
-- Commit 3: GitHub Actions CI running the same quality gates. Done once a green run on `main` is
-  confirmed on GitHub.
+- Commit 3: GitHub Actions CI running the same quality gates. The first GitHub-hosted run on
+  `main` passed (done).
 
 **Acceptance criteria**
 - The docs define the splits, metrics, leakage rules, and the comparison method.
@@ -54,7 +54,10 @@ Phase 1 starts only after Phase 0 CI is in place and passing.
 **Objective:** produce deterministic, audited data partitions and a frozen intent subset.
 
 **Deliverables**
-- A dataset loader pinned to a Hugging Face revision.
+- A verified ingestion layer for the official BANKING77 CSVs: pinned upstream commit,
+  SHA-256 checks, strict CSV schema validation, typed records, and an explicit download
+  command. The upstream CSVs replace the Hugging Face loader, because that loader depends on
+  a legacy dataset script.
 - A subset config: in-scope intents, OOS-dev intents, and OOS-test intents.
 - A seeded stratified splitter (train/validation/calibration), with split membership saved as
   IDs/hashes.
@@ -69,6 +72,11 @@ Phase 1 starts only after Phase 0 CI is in place and passing.
 - Official test examples never appear in training-side partitions.
 - The subset is chosen using only label names and train-split statistics. The rationale is
   documented.
+- Raw files pass checksum and schema validation (10,003 train rows with 77 intents; 3,080 test
+  rows). Unit tests and CI run offline and never download the dataset.
+
+**Progress**
+- Commit 1.1: verified BANKING77 ingestion (done).
 
 ## Phase 2: TF-IDF + Logistic Regression baseline
 
@@ -202,7 +210,7 @@ Small, atomic commits. Each one leaves the repository in a passing state.
 3. `ci: add automated Python quality checks` (CI brought forward from Phase 6)
 
 **Phase 1**
-4. `feat(data): add pinned BANKING77 loader`
+4. `feat(data): implement verified BANKING77 ingestion`
 5. `feat(data): add intent subset and OOS group configuration`
 6. `feat(data): add deterministic stratified splitter`
 7. `feat(data): add leakage and duplicate validation checks`

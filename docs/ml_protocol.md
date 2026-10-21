@@ -7,16 +7,45 @@
 
 ## 1. Dataset provenance
 
-- **Source:** BANKING77 (PolyAI), loaded from Hugging Face `PolyAI/banking77`. The CC BY 4.0
-  license and citation are given in the [README](../README.md#dataset-attribution).
+- **Source:** BANKING77 (PolyAI), as the original `train.csv` and `test.csv` files from
+  [`PolyAI-LDN/task-specific-datasets`](https://github.com/PolyAI-LDN/task-specific-datasets)
+  (`banking_data/`). The CC BY 4.0 license and citation are given in the
+  [README](../README.md#dataset-attribution).
 - **Content:** English customer-support queries in the banking domain, each labelled with one
   of 77 fine-grained intents. The dataset ships with official `train` and `test` splits and has
   no validation split.
-- **Pinning:** the Hugging Face dataset revision (commit hash) used for every run is recorded in
-  config and in each artifact manifest.
-- **Assumption to verify in Phase 1:** the published split sizes, class counts, and loading
-  method (some dataset versions moved from a loading script to Parquet files) are checked
-  against the downloaded data, and any discrepancy is documented.
+- **Why not Hugging Face:** the `PolyAI/banking77` Hugging Face entry depends on a legacy
+  dataset loading script, which recent versions of the `datasets` library may refuse to run. The
+  upstream CSVs are the same published data and need only the Python standard library to read.
+- **Pinning:** files are fetched from the immutable upstream commit
+  `57ec275d8078af65b7731c2a98be812d844a6d6b`, never from a moving branch. This commit and the
+  checksums below are the "dataset revision" recorded in config and in each artifact manifest.
+  They are defined once, in `intentlab_ai.data.banking77`.
+- **Checksum policy:** every raw file is verified against its SHA-256 checksum after download
+  (before it is accepted into the cache) and again before every load. A mismatch is a hard
+  error. Verification is never disabled or bypassed. A changed checksum means a changed dataset,
+  and it requires a reviewed update to this protocol.
+
+  | File | SHA-256 | Rows | Intents |
+  |---|---|---|---|
+  | `train.csv` | `b06e26ac675513959a63135f11b94ea7786ed02da65db93a5650d8838cbc664b` | 10,003 | 77 |
+  | `test.csv` | `d12d6e3bc4c3103966ae786dc435913c0c563dfa328f5a3646d0e62cfeeb474d` | 3,080 | not inspected |
+
+  These checksums match those listed in the Hugging Face dataset metadata, and they were
+  verified against the downloaded bytes on 2026-10-21. At that date, upstream `master` served
+  byte-identical files.
+- **Schema validation:** the header must be exactly `text,category`. Rows are parsed with a
+  standard CSV parser that handles quoted fields. Rows with the wrong number of fields, empty or
+  whitespace-only text, an empty category, malformed quoting, or invalid UTF-8 are rejected with
+  the file and line number. Text and intent names are kept exactly as published: they are not
+  stripped, normalized, or remapped to integer IDs during ingestion.
+- **Local storage:** raw files are cached in `data/raw/banking77/` (git-ignored) and downloaded
+  only by an explicit command (`scripts/inspect_banking77.py --download`). Tests and CI never
+  download them.
+- **Official vs. derived splits:** ingestion yields only the two *official* splits, unchanged
+  and in file order. All experimental partitions (§3) are derived later, from the official train
+  split only. For the official test split, ingestion checks only the checksum and row count. It
+  does not compute label statistics or EDA on test data.
 
 ## 2. Intent-subset strategy
 

@@ -1,13 +1,13 @@
 # IntentLab AI
 
 A small, production-minded intent-classification project built on a subset of the
-[BANKING77](https://huggingface.co/datasets/PolyAI/banking77) dataset. It compares a
+[BANKING77](https://github.com/PolyAI-LDN/task-specific-datasets) dataset. It compares a
 classical TF-IDF baseline against a frozen sentence-embedding challenger and treats
 calibration, uncertainty, and abstention as primary concerns rather than afterthoughts.
 
-> **Current status: Phase 0 (foundation). Only documentation exists.**
-> There is no application code, trained model, or experimental result in this repository yet.
-> Everything below that describes pipelines, models, APIs, or demos is **planned**.
+> **Current status: Phase 1 (data) in progress.** Implemented so far: project foundation, CI,
+> and verified ingestion of the official BANKING77 CSV files. There is no trained model or
+> experimental result yet. Everything below that describes models, APIs, or demos is **planned**.
 
 ## Problem statement
 
@@ -65,8 +65,8 @@ The demo calls the same FastAPI service that a programmatic client would use.
 
 | Phase | Focus | Status |
 |---|---|---|
-| 0 | Project foundation and architecture | **In progress** |
-| 1 | Dataset preparation, EDA, validation strategy | Planned |
+| 0 | Project foundation and architecture | Done |
+| 1 | Dataset preparation, EDA, validation strategy | **In progress** (ingestion done) |
 | 2 | TF-IDF + Logistic Regression baseline | Planned |
 | 3 | Frozen sentence-embedding challenger | Planned |
 | 4 | Evaluation, calibration, abstention, model comparison | Planned |
@@ -121,6 +121,34 @@ To reproduce CI locally, run the quality checks above followed by:
 .venv\Scripts\python.exe -m pip check
 ```
 
+## BANKING77 raw data
+
+The official BANKING77 CSV files are downloaded from the original PolyAI repository, pinned to
+upstream commit `57ec275d8078af65b7731c2a98be812d844a6d6b`. Each file is checked against a
+recorded SHA-256 checksum before it is used. We use these upstream CSVs rather than the Hugging
+Face `PolyAI/banking77` entry because that entry depends on a legacy loading script, which recent
+versions of the `datasets` library may refuse to run. The CSVs need only the Python standard
+library.
+
+```powershell
+# Download (only when explicitly requested) and verify into data\raw\banking77\
+.venv\Scripts\python.exe scripts\inspect_banking77.py --download
+
+# Re-verify the local cache without network access
+.venv\Scripts\python.exe scripts\inspect_banking77.py
+```
+
+- Raw files live in `data/raw/banking77/`, which is git-ignored. They are never committed.
+- Unit tests and CI never download the dataset. They use tiny local fixtures instead.
+- These are the **official** train (10,003 rows, 77 intents) and test (3,080 rows) splits.
+  Derived experimental partitions (train/validation/calibration and the intent subset) are
+  built later from the official train split only.
+- The official test split is never used for EDA, intent selection, tuning, calibration,
+  thresholds, or model choice (see [docs/ml_protocol.md](docs/ml_protocol.md)).
+
+Full provenance and the checksum policy are documented in
+[docs/ml_protocol.md](docs/ml_protocol.md#1-dataset-provenance).
+
 ## Planned technology
 
 Python 3.12, scikit-learn, sentence-transformers, pandas, NumPy, FastAPI, Pydantic, Streamlit,
@@ -131,15 +159,15 @@ them.
 
 This project uses **BANKING77**, created by PolyAI:
 
-- Dataset card: <https://huggingface.co/datasets/PolyAI/banking77>
-- Original release: <https://github.com/PolyAI-LDN/task-specific-datasets>
+- Original release (data source used here): <https://github.com/PolyAI-LDN/task-specific-datasets>
+- Hugging Face dataset card: <https://huggingface.co/datasets/PolyAI/banking77>
 - Paper: Iñigo Casanueva, Tadas Temčinas, Daniela Gerz, Matthew Henderson, Ivan Vulić.
   *Efficient Intent Detection with Dual Sentence Encoders.* Proceedings of the 2nd Workshop on
   NLP for Conversational AI (ACL 2020). <https://arxiv.org/abs/2003.04807>
 
 BANKING77 is distributed under the Creative Commons Attribution 4.0 (CC BY 4.0) license. This
-repository will not redistribute the raw dataset. It will be downloaded from the source at
-pipeline run time.
+repository does not redistribute the raw dataset. It is downloaded from the pinned upstream
+source on explicit request (see [BANKING77 raw data](#banking77-raw-data)).
 
 ## License
 
