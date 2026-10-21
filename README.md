@@ -5,8 +5,9 @@ A small, production-minded intent-classification project built on a subset of th
 classical TF-IDF baseline against a frozen sentence-embedding challenger and treats
 calibration, uncertainty, and abstention as primary concerns rather than afterthoughts.
 
-> **Current status: Phase 1 (data) in progress.** Implemented so far: project foundation, CI,
-> and verified ingestion of the official BANKING77 CSV files. There is no trained model or
+> **Current status: Phase 1 (data) complete.** Implemented so far: project foundation, CI,
+> verified BANKING77 ingestion, training-only EDA, the frozen intent taxonomy, and frozen
+> development partitions. There is no trained model or
 > experimental result yet. Everything below that describes models, APIs, or demos is **planned**.
 
 ## Problem statement
@@ -66,7 +67,7 @@ The demo calls the same FastAPI service that a programmatic client would use.
 | Phase | Focus | Status |
 |---|---|---|
 | 0 | Project foundation and architecture | Done |
-| 1 | Dataset preparation, EDA, validation strategy | **In progress** (ingestion, training-set EDA, and intent taxonomy done) |
+| 1 | Dataset preparation, EDA, validation strategy | Done |
 | 2 | TF-IDF + Logistic Regression baseline | Planned |
 | 3 | Frozen sentence-embedding challenger | Planned |
 | 4 | Evaluation, calibration, abstention, model comparison | Planned |
@@ -84,6 +85,7 @@ Details, acceptance criteria, and the commit plan are in
 - [Development plan](docs/development_plan.md): phases, acceptance criteria, exclusions, commits
 - [Data exploration](docs/data_exploration.md): training-split EDA findings and subset considerations
 - [Intent taxonomy](docs/intent_taxonomy.md): the frozen supported intents and out-of-scope groups
+- [Data partitions](docs/data_partitions.md): the frozen split policy, partition counts, and leakage checks
 
 ## Development setup (Windows PowerShell)
 
@@ -189,6 +191,33 @@ To validate it offline against the verified training split (it never reads `test
 The rationale, the allocation rule, the data-access rules, and the freeze policy are in
 [docs/intent_taxonomy.md](docs/intent_taxonomy.md). The taxonomy must not be changed in
 response to model performance.
+
+### Development partitions (frozen split policy v1.0.0)
+
+```powershell
+.venv\Scripts\python.exe scripts\prepare_banking77.py
+```
+
+This command is offline and reads only the verified `train.csv`, never `test.csv`. It applies
+[`config/split_policy.json`](config/split_policy.json): 70/15/15, seed 42, stratified by
+intent, with normalized-duplicate groups kept together. It produces four development
+partitions:
+
+| Partition | Records |
+|---|---|
+| `id_train` | 1,276 |
+| `id_validation` | 275 |
+| `id_calibration` | 275 |
+| `oos_validation` | 4,033 |
+
+- **What each partition is for:** `id_calibration` is reserved for fitting calibrators.
+  Validation supports model selection and, later, abstention-threshold selection.
+- **Excluded data:** the 4,144 training records of the OOS-final-test intents are excluded from
+  development.
+- **Sealed test split:** the official test split stays sealed until final evaluation.
+- **Manifest:** a deterministic, text-free membership manifest is written to
+  `reports/generated/split_manifest.json` (git-ignored). Details are in
+  [docs/data_partitions.md](docs/data_partitions.md).
 
 ## Planned technology
 

@@ -102,7 +102,7 @@ src/intentlab_ai/
   data/              # banking77.py: verified raw ingestion (implemented);
                      # eda.py: training-split EDA (implemented);
                      # taxonomy.py: frozen taxonomy validation (implemented);
-                     # splitting, leakage checks (planned)
+                     # partitions.py: deterministic splits + leakage checks (implemented)
   features/          # text normalization shared by training and inference
   models/            # baseline and challenger estimators behind one small interface
   evaluation/        # classification metrics, calibration, risk–coverage, OOS metrics, reports
@@ -113,6 +113,7 @@ app/
 scripts/             # explicit CLI entry points (e.g. inspect_banking77.py)
 config/
   intent_taxonomy.json  # frozen supported/OOS intent groups (single source of truth)
+  split_policy.json     # frozen partition policy: fractions, seed, algorithm, pins
 tests/               # unit and integration tests
 artifacts/           # generated model artifacts (git-ignored)
 reports/             # generated evaluation reports (small summaries may be committed)

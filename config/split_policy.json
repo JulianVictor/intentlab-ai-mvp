@@ -1,0 +1,28 @@
+{
+  "split_policy_version": "1.0.0",
+  "algorithm_version": "stratified-hash-v1",
+  "dataset": {
+    "source": "PolyAI-LDN/task-specific-datasets",
+    "revision": "57ec275d8078af65b7731c2a98be812d844a6d6b",
+    "train_file": "train.csv",
+    "train_sha256": "b06e26ac675513959a63135f11b94ea7786ed02da65db93a5650d8838cbc664b"
+  },
+  "taxonomy": {
+    "path": "config/intent_taxonomy.json",
+    "version": "1.0.0",
+    "sha256": "8568d4b7100c8d61b61d741c2510fee2bc6a3f9fb3caa56d3846b3506021b35c"
+  },
+  "random_seed": 42,
+  "fractions": {
+    "id_train": 0.70,
+    "id_validation": 0.15,
+    "id_calibration": 0.15
+  },
+  "duplicate_normalization": {
+    "unicode_form": "NFKC",
+    "case": "casefold",
+    "whitespace": "collapse"
+  },
+  "rounding": "Per supported intent with n records: validation and calibration quotas are floor(n * fraction + 1/2) in exact rational arithmetic; id_train receives the remainder.",
+  "method": "Records of OOS-final-test intents are dropped. Remaining records are grouped by normalized text (NFKC, case folding, whitespace collapsed). Groups of only OOS-validation intents go to oos_validation; groups spanning a supported and an OOS-validation intent are an error; groups spanning several supported intents are pinned to id_train. Each supported intent's remaining groups are ordered by SHA-256 of canonical JSON [algorithm_version, random_seed, intent, normalized_text] and assigned to id_validation if they fit its remaining quota, else id_calibration if they fit, else id_train. Groups are never split. Every supported intent must have at least one record in each ID partition."
+}

@@ -82,16 +82,25 @@ presented as such.
 
 | Partition | Source | In-scope intents | OOS intents | Used for |
 |---|---|---|---|---|
-| `train` | official train | ✔ | — | Fitting models |
-| `validation` | official train | ✔ | OOS-dev intents | Hyperparameter selection, model selection, abstention/OOS thresholds |
-| `calibration` | official train | ✔ | — | Fitting the post-hoc calibration map only |
+| `train` (`id_train`) | official train | ✔ | — | Fitting models |
+| `validation` (`id_validation` + `oos_validation`) | official train | ✔ | OOS-dev intents | Hyperparameter selection, model selection, abstention/OOS thresholds |
+| `calibration` (`id_calibration`) | official train | ✔ | — | Fitting the post-hoc calibration map only |
 | `test` | official test | ✔ | OOS-test intents | Final, one-time reporting only |
 
 Rules:
 
 - The in-scope examples from the official train split are divided by a **stratified, seeded**
-  split into train/validation/calibration (provisionally 70/15/15). The final ratios are fixed
-  in Phase 1 after inspecting class counts.
+  split into train/validation/calibration.
+  - **Frozen in Phase 1 Commit 1.4, before any model training:** split policy v1.0.0
+    ([`config/split_policy.json`](../config/split_policy.json)) fixes 70/15/15, seed 42, and the
+    `stratified-hash-v1` algorithm, which keeps duplicate groups together.
+  - The result is 1,276 / 275 / 275 in-scope records. See [data_partitions.md](data_partitions.md).
+- In-scope validation and OOS-dev examples are kept in separate partitions (`id_validation` and
+  `oos_validation`). Metrics on them are reported separately. Pooled metrics must state the
+  in-scope/OOS mix, because `oos_validation` (4,033) is about 14.7 times the size of
+  `id_validation` (275).
+- `id_calibration` is reserved for fitting the post-hoc calibrator. `oos_validation` is never
+  used to fit the classifier or the calibrator.
 - **OOS intents are themselves split into disjoint groups:** *OOS-dev* intents (used only in
   validation) and *OOS-test* intents (used only in test). Thresholds are therefore never tuned
   on the same kinds of unknown inputs they are evaluated on. This provides an honest estimate
@@ -127,6 +136,21 @@ Rules:
 - **Shared normalization:** training and inference use the same normalization code path.
 - **No label information in features**, and no test-derived statistics anywhere in the
   pipeline.
+
+**Amendment 1 (2026-10-21, before any model training): train/test overlap handling.**
+
+- **Original text:** the two bullets above said training-side duplicates of test examples would
+  be removed during data preparation, and that Phase 1 would run a near-duplicate scan.
+- **Why it changed:** both require opening the official test split during development, which
+  §3 forbids.
+- **What happens now:**
+  - No training record is removed or altered because of test data.
+  - Train-vs-test exact, normalized, and near-duplicate overlap will be measured by a separately
+    specified leakage audit. Its procedure will be committed before final evaluation, and the
+    audit will run only after all experimental choices are frozen.
+  - Its findings will be reported alongside the final test results.
+- **What Phase 1 did instead:** it enforces duplicate protection **within** the development
+  partitions only, using normalized-text grouping (see [data_partitions.md](data_partitions.md)).
 
 ## 5. Classification metrics (in-scope)
 

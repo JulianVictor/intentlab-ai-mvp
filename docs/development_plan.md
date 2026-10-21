@@ -1,6 +1,6 @@
 # Development Plan
 
-> **Status:** Phase 0 complete. Phase 1 in progress. All later phases are planned. A phase is "done" only when
+> **Status:** Phases 0 and 1 complete. All later phases are planned. A phase is "done" only when
 > its acceptance criteria are met by committed, tested code.
 
 ## Phase overview
@@ -8,7 +8,7 @@
 | Phase | Title | Status |
 |---|---|---|
 | 0 | Project foundation and architecture | Done |
-| 1 | Dataset preparation, EDA, validation strategy | In progress |
+| 1 | Dataset preparation, EDA, validation strategy | Done |
 | 2 | TF-IDF + Logistic Regression baseline | Planned |
 | 3 | Frozen sentence-embedding challenger | Planned |
 | 4 | Evaluation, calibration, abstention, model comparison | Planned |
@@ -62,17 +62,21 @@ Phase 1 starts only after Phase 0 CI is in place and passing.
   ([`config/intent_taxonomy.json`](../config/intent_taxonomy.json), validated by
   `scripts/validate_taxonomy.py`; see [intent_taxonomy.md](intent_taxonomy.md)).
 - A seeded stratified splitter (train/validation/calibration), with split membership saved as
-  IDs/hashes.
-- Data validation checks: schema, class coverage, empty text, and exact and near-duplicates
-  across splits.
+  IDs/hashes ([data_partitions.md](data_partitions.md), `scripts/prepare_banking77.py`).
+- Data validation checks: schema, class coverage, and empty text. Normalized-duplicate
+  protection is enforced *within* the development partitions. Train-vs-test duplicate checks
+  are deferred to the final-evaluation leakage audit (protocol §4, Amendment 1).
 - A short **training-split-only** EDA report: class counts, text-length distribution,
   within-train duplicate findings, and candidate intent-name overlap
   ([data_exploration.md](data_exploration.md)).
 
 **Acceptance criteria**
 - Re-running the split produces identical membership (verified by a test).
-- No exact duplicate exists between the training-side partitions and test (verified by a test).
-- Official test examples never appear in training-side partitions.
+- No normalized-text duplicate crosses a development-partition boundary (verified on every
+  build). Train-vs-test overlap is audited before final evaluation (protocol §4,
+  Amendment 1), not in Phase 1.
+- Official test examples never appear in training-side partitions. The official test CSV is
+  never opened in Phase 1.
 - The subset is chosen using only label names and train-split statistics. The rationale is
   documented.
 - Raw files pass checksum and schema validation (10,003 train rows with 77 intents; 3,080 test
@@ -86,8 +90,10 @@ Phase 1 starts only after Phase 0 CI is in place and passing.
 - Commit 1.3: froze taxonomy v1.0.0. It has 12 supported intents (8 bank transfers and 4 card
   payments, each with at least 100 training examples) and 65 OOS intents (32 OOS-validation
   and 33 OOS-final-test), allocated by a deterministic rule from training metadata only (done).
-- Next, Commit 1.4: deterministic train/validation/calibration partitions of the supported
-  intents, plus OOS-validation examples, with saved split membership.
+- Commit 1.4: froze split policy v1.0.0 (70/15/15, seed 42) and implemented the deterministic,
+  duplicate-aware partitions: 1,276 / 275 / 275 in-scope records and 4,033 `oos_validation`
+  records. The 4,144 OOS-final-test training records are excluded, and a text-free manifest
+  is generated (done).
 
 ## Phase 2: TF-IDF + Logistic Regression baseline
 
@@ -224,8 +230,10 @@ Small, atomic commits. Each one leaves the repository in a passing state.
 4. `feat(data): implement verified BANKING77 ingestion`
 5. `feat(data): add reproducible training-set EDA`
 6. `feat(data): add intent subset and OOS group configuration`
-7. `feat(data): add deterministic stratified splitter`
-8. `feat(data): add leakage and duplicate validation checks`
+7. `feat(data): implement deterministic dataset partitions` (includes the within-development
+   leakage checks)
+8. Train-vs-test leakage audit, moved to Phase 4 before final evaluation (protocol §4,
+   Amendment 1)
 
 **Phase 2**
 9. `feat(features): add shared text normalization`

@@ -136,7 +136,7 @@ def _labels(data: Mapping[str, object], key: str, where: str) -> tuple[str, ...]
 def parse_taxonomy(
     data: object,
     *,
-    source_file: SourceFile = SOURCE_FILES["train"],
+    source_file: SourceFile | None = None,
     revision: str = SOURCE_REVISION,
     repository: str = SOURCE_REPOSITORY,
 ) -> IntentTaxonomy:
@@ -188,7 +188,9 @@ def parse_taxonomy(
         oos_validation=_labels(data, "oos_validation_intents", "taxonomy"),
         oos_final_test=_labels(data, "oos_final_test_intents", "taxonomy"),
     )
-    _check_provenance(taxonomy, source_file, revision, repository)
+    # Resolved at call time (not import time) so the pinned spec is always the current one.
+    spec = SOURCE_FILES["train"] if source_file is None else source_file
+    _check_provenance(taxonomy, spec, revision, repository)
     _check_groups(taxonomy)
     return taxonomy
 
@@ -257,7 +259,7 @@ def _check_groups(taxonomy: IntentTaxonomy) -> None:
 def load_taxonomy(
     path: Path = DEFAULT_TAXONOMY_PATH,
     *,
-    source_file: SourceFile = SOURCE_FILES["train"],
+    source_file: SourceFile | None = None,
     revision: str = SOURCE_REVISION,
     repository: str = SOURCE_REPOSITORY,
 ) -> IntentTaxonomy:
