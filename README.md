@@ -107,6 +107,20 @@ Quality checks:
 The package currently contains only its skeleton: the data pipeline, models, API, and demo are
 **not yet implemented**.
 
+### Continuous integration
+
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs on every push to `main`, on every pull
+request targeting `main`, and on manual dispatch. It runs on a clean Ubuntu runner with Python 3.12
+and installs the project from `pyproject.toml` with `pip install -e ".[dev]"`. Then it runs the
+same commands shown above, plus `python -m pip check`. Any failing step fails the run. The
+workflow needs no secrets and has read-only repository access.
+
+To reproduce CI locally, run the quality checks above followed by:
+
+```powershell
+.venv\Scripts\python.exe -m pip check
+```
+
 ## Planned technology
 
 Python 3.12, scikit-learn, sentence-transformers, pandas, NumPy, FastAPI, Pydantic, Streamlit,

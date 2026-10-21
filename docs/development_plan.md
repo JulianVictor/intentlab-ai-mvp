@@ -28,13 +28,26 @@ code.
 - A src-layout package skeleton (`src/intentlab_ai/`), `pyproject.toml`, `.gitignore`, and
   Ruff/mypy/pytest configuration.
 - A minimal smoke test that imports the package.
+- A GitHub Actions CI workflow (`.github/workflows/ci.yml`) that runs the local quality gates on
+  every push and pull request to `main`. This was brought forward from Phase 6, so every later
+  commit is checked automatically.
+
+**Progress**
+- Commit 1: architecture, ML protocol, and development plan docs (done).
+- Commit 2: package scaffold, `pyproject.toml`, `.gitignore`/`.gitattributes`, Ruff/mypy/pytest
+  configuration, and the smoke test. All local quality gates pass (done).
+- Commit 3: GitHub Actions CI running the same quality gates. Done once a green run on `main` is
+  confirmed on GitHub.
 
 **Acceptance criteria**
 - The docs define the splits, metrics, leakage rules, and the comparison method.
-- `pip install -e .[dev]` works on Python 3.12, and `ruff check`, `mypy`, and `pytest` all pass
-  on the skeleton.
+- `pip install -e .[dev]` works on Python 3.12, and `ruff check`, `ruff format --check`, `mypy`,
+  `pytest`, and `pip check` all pass on the skeleton.
+- The CI workflow runs these same checks on GitHub and passes on `main`.
 - `.venv/`, `artifacts/`, data caches, and `.env` files are git-ignored.
 - Only foundation dependencies are installed. No ML or serving libraries yet.
+
+Phase 1 starts only after Phase 0 CI is in place and passing.
 
 ## Phase 1: Dataset preparation, EDA, and validation strategy
 
@@ -142,7 +155,8 @@ one on validation evidence.
 - Integration tests: an end-to-end run from a tiny fixture dataset → artifact → API prediction.
 - A Dockerfile for the API (slim base, non-root user, health check, artifact and encoder baked
   in) and a run configuration for the demo.
-- GitHub Actions: Ruff, mypy, pytest, and Docker build on push and pull request.
+- Extend the existing CI workflow (added in Phase 0) with integration tests and a Docker build
+  on push and pull request.
 - Public deployment on a free or low-cost platform. A license file is added.
 
 **Acceptance criteria**
@@ -184,8 +198,8 @@ Small, atomic commits. Each one leaves the repository in a passing state.
 
 **Phase 0**
 1. `docs: define IntentLab AI architecture and ML evaluation protocol`
-2. `build: scaffold src-layout package with pyproject and gitignore`
-3. `chore: configure ruff, mypy, and pytest with smoke test`
+2. `chore: scaffold Python package and development tooling` (package, tool config, smoke test)
+3. `ci: add automated Python quality checks` (CI brought forward from Phase 6)
 
 **Phase 1**
 4. `feat(data): add pinned BANKING77 loader`
@@ -221,7 +235,7 @@ Small, atomic commits. Each one leaves the repository in a passing state.
 **Phase 6**
 25. `test: add end-to-end integration test on fixture data`
 26. `build: add Dockerfile for inference service`
-27. `ci: add GitHub Actions lint, type, test, and docker workflow`
+27. `ci: add integration tests and docker build to CI workflow`
 28. `chore: add license and deployment configuration`
 
 **Phase 7**
