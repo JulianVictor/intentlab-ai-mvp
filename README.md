@@ -66,7 +66,7 @@ The demo calls the same FastAPI service that a programmatic client would use.
 | Phase | Focus | Status |
 |---|---|---|
 | 0 | Project foundation and architecture | Done |
-| 1 | Dataset preparation, EDA, validation strategy | **In progress** (ingestion and training-set EDA done) |
+| 1 | Dataset preparation, EDA, validation strategy | **In progress** (ingestion, training-set EDA, and intent taxonomy done) |
 | 2 | TF-IDF + Logistic Regression baseline | Planned |
 | 3 | Frozen sentence-embedding challenger | Planned |
 | 4 | Evaluation, calibration, abstention, model comparison | Planned |
@@ -83,6 +83,7 @@ Details, acceptance criteria, and the commit plan are in
 - [ML protocol](docs/ml_protocol.md): data splits, leakage rules, metrics, comparison method
 - [Development plan](docs/development_plan.md): phases, acceptance criteria, exclusions, commits
 - [Data exploration](docs/data_exploration.md): training-split EDA findings and subset considerations
+- [Intent taxonomy](docs/intent_taxonomy.md): the frozen supported intents and out-of-scope groups
 
 ## Development setup (Windows PowerShell)
 
@@ -168,6 +169,26 @@ CSV, never `test.csv`, and writes a deterministic JSON report to
 
 The findings and their implications for choosing the supported intents are summarized in
 [docs/data_exploration.md](docs/data_exploration.md).
+
+### Intent taxonomy (frozen v1.0.0)
+
+The single authoritative list of supported and out-of-scope intents is
+[`config/intent_taxonomy.json`](config/intent_taxonomy.json):
+
+- **12 supported intents:** 8 bank-transfer intents and 4 card-payment intents, each with at
+  least 100 training examples.
+- **65 out-of-scope intents:** split deterministically into 32 OOS-validation intents and 33
+  OOS-final-test intents.
+
+To validate it offline against the verified training split (it never reads `test.csv`):
+
+```powershell
+.venv\Scripts\python.exe scripts\validate_taxonomy.py
+```
+
+The rationale, the allocation rule, the data-access rules, and the freeze policy are in
+[docs/intent_taxonomy.md](docs/intent_taxonomy.md). The taxonomy must not be changed in
+response to model performance.
 
 ## Planned technology
 

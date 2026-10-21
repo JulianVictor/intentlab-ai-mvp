@@ -101,7 +101,8 @@ src/intentlab_ai/
   config.py          # typed settings: paths, seeds, dataset revision, class lists
   data/              # banking77.py: verified raw ingestion (implemented);
                      # eda.py: training-split EDA (implemented);
-                     # subset selection, splitting, validation checks (planned)
+                     # taxonomy.py: frozen taxonomy validation (implemented);
+                     # splitting, leakage checks (planned)
   features/          # text normalization shared by training and inference
   models/            # baseline and challenger estimators behind one small interface
   evaluation/        # classification metrics, calibration, risk–coverage, OOS metrics, reports
@@ -110,6 +111,8 @@ src/intentlab_ai/
 app/
   streamlit_app.py   # demo UI; talks to the API over HTTP only
 scripts/             # explicit CLI entry points (e.g. inspect_banking77.py)
+config/
+  intent_taxonomy.json  # frozen supported/OOS intent groups (single source of truth)
 tests/               # unit and integration tests
 artifacts/           # generated model artifacts (git-ignored)
 reports/             # generated evaluation reports (small summaries may be committed)

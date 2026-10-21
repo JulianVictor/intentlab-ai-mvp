@@ -58,7 +58,9 @@ Phase 1 starts only after Phase 0 CI is in place and passing.
   SHA-256 checks, strict CSV schema validation, typed records, and an explicit download
   command. The upstream CSVs replace the Hugging Face loader, because that loader depends on
   a legacy dataset script.
-- A subset config: in-scope intents, OOS-dev intents, and OOS-test intents.
+- A subset config: in-scope intents, OOS-dev intents, and OOS-test intents
+  ([`config/intent_taxonomy.json`](../config/intent_taxonomy.json), validated by
+  `scripts/validate_taxonomy.py`; see [intent_taxonomy.md](intent_taxonomy.md)).
 - A seeded stratified splitter (train/validation/calibration), with split membership saved as
   IDs/hashes.
 - Data validation checks: schema, class coverage, empty text, and exact and near-duplicates
@@ -81,8 +83,11 @@ Phase 1 starts only after Phase 0 CI is in place and passing.
 - Commit 1.2: reproducible training-set EDA (`intentlab_ai.data.eda`,
   `scripts/analyze_banking77.py`, [data_exploration.md](data_exploration.md)). This uses
   training data only. The intent subset is not frozen (done).
-- Next, Commit 1.3: freeze the supported-intent subset and the OOS-dev/OOS-test groups,
-  following protocol §2.
+- Commit 1.3: froze taxonomy v1.0.0. It has 12 supported intents (8 bank transfers and 4 card
+  payments, each with at least 100 training examples) and 65 OOS intents (32 OOS-validation
+  and 33 OOS-final-test), allocated by a deterministic rule from training metadata only (done).
+- Next, Commit 1.4: deterministic train/validation/calibration partitions of the supported
+  intents, plus OOS-validation examples, with saved split membership.
 
 ## Phase 2: TF-IDF + Logistic Regression baseline
 

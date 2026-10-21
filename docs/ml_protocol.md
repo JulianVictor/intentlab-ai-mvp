@@ -62,6 +62,18 @@ Selection rule (finalized and frozen in Phase 1, before any model is trained):
 4. Record the chosen intents in a versioned config file. Changing them later invalidates all
    prior results.
 
+**Frozen selection (taxonomy v1.0.0, Phase 1 Commit 1.3).** The rules above were applied
+without change. The result is recorded in
+[`config/intent_taxonomy.json`](../config/intent_taxonomy.json) and explained in
+[intent_taxonomy.md](intent_taxonomy.md):
+
+- 12 supported intents in two families: 8 bank-transfer and 4 card-payment intents.
+- 65 OOS intents, split into 32 OOS-validation and 33 OOS-final-test intents.
+
+**Pre-training design decision (clarifies rule 3):** "adequate training support" means **at
+least 100 examples per supported intent in the official training split**. This was fixed before
+any model was trained, and every selected intent meets it (113–187).
+
 **Assumption:** a subset makes per-class analysis, the demo, and OOS simulation tractable. The
 results are not comparable to published full-77-class BANKING77 benchmarks, and they will not be
 presented as such.
@@ -83,7 +95,15 @@ Rules:
 - **OOS intents are themselves split into disjoint groups:** *OOS-dev* intents (used only in
   validation) and *OOS-test* intents (used only in test). Thresholds are therefore never tuned
   on the same kinds of unknown inputs they are evaluated on. This provides an honest estimate
-  for genuinely unseen intents.
+  for unseen intents.
+  - These groups are the `oos_validation_intents` and `oos_final_test_intents` lists in
+    `config/intent_taxonomy.json`.
+  - They were allocated by a deterministic, training-metadata-only rule (see
+    [intent_taxonomy.md](intent_taxonomy.md) §7).
+  - Training-CSV examples of **OOS-test** intents are excluded from all development use: no
+    training, calibration, thresholds, or model selection.
+  - At final evaluation, only OOS-test intents from the official test split are scored. Test
+    examples of OOS-dev intents are not used.
 - The **official test split is preserved unchanged** for in-scope intents. It is never used for
   hyperparameter selection, calibration, threshold tuning, early stopping, feature selection,
   or model choice.
