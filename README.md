@@ -1,0 +1,109 @@
+# IntentLab AI
+
+A small, production-minded intent-classification project built on a subset of the
+[BANKING77](https://huggingface.co/datasets/PolyAI/banking77) dataset. It compares a
+classical TF-IDF baseline against a frozen sentence-embedding challenger and treats
+calibration, uncertainty, and abstention as primary concerns rather than afterthoughts.
+
+> **Current status: Phase 0 (foundation). Only documentation exists.**
+> There is no application code, trained model, or experimental result in this repository yet.
+> Everything below that describes pipelines, models, APIs, or demos is **planned**.
+
+## Problem statement
+
+A customer-support system that routes a banking message to the wrong workflow causes harm, and
+so does a confident wrong answer. A useful intent classifier therefore has to do three things:
+
+1. Assign a supported intent to in-scope messages accurately.
+2. Report a confidence score that has been checked against observed accuracy (calibrated), not a
+   raw classifier score.
+3. Abstain, meaning it declines to predict, when a message is unreliable or outside the supported
+   intents (out-of-scope).
+
+IntentLab AI is intentionally narrow. It is **not** a chatbot, a RAG application, or an agentic
+system. It is a classifier with an honest uncertainty story.
+
+## Planned ML pipeline
+
+| Stage | What happens | Phase |
+|---|---|---|
+| Data | Load BANKING77, choose 10–15 supported intents, build deterministic train/validation/calibration splits, keep the official test split untouched | 1 |
+| Baseline | TF-IDF features + multinomial Logistic Regression | 2 |
+| Challenger | Frozen sentence-transformers embeddings + linear classifier | 3 |
+| Evaluation | Macro-F1, per-class metrics, calibration diagnostics, risk–coverage analysis, out-of-scope detection | 4 |
+| Serving | FastAPI inference service + lightweight Streamlit demo | 5 |
+| Delivery | Docker, GitHub Actions CI, public deployment | 6 |
+
+The full evaluation rules are in [docs/ml_protocol.md](docs/ml_protocol.md).
+
+## Baseline vs. challenger
+
+- **Baseline:** TF-IDF + Logistic Regression. Fast, transparent, and cheap to serve. It is the
+  standard any more complex model must beat.
+- **Challenger:** a frozen pretrained sentence encoder whose embeddings feed a lightweight
+  classifier. No encoder fine-tuning. It is expected to handle paraphrases better, but it costs
+  more latency, memory, and dependency weight.
+
+Both models use identical splits and seeds, and both get comparable tuning effort. The
+deployed model is chosen on **validation** evidence, with serving cost taken into account. The
+official test split is used only for final reporting. If the challenger does not clearly win,
+the baseline ships.
+
+## Intended demo experience (planned)
+
+A visitor types a banking-style message into a Streamlit page and sees:
+
+- The predicted intent, or an explicit **"abstained"** result with the reason (low confidence
+  or likely out-of-scope).
+- A calibrated confidence score and the top-k candidate intents.
+- The model version that produced the answer.
+- A short note on what the model supports and what it does not.
+
+The demo calls the same FastAPI service that a programmatic client would use.
+
+## Roadmap
+
+| Phase | Focus | Status |
+|---|---|---|
+| 0 | Project foundation and architecture | **In progress** |
+| 1 | Dataset preparation, EDA, validation strategy | Planned |
+| 2 | TF-IDF + Logistic Regression baseline | Planned |
+| 3 | Frozen sentence-embedding challenger | Planned |
+| 4 | Evaluation, calibration, abstention, model comparison | Planned |
+| 5 | FastAPI service and Streamlit demo | Planned |
+| 6 | Integration tests, Docker, CI, public deployment | Planned |
+| 7 | Documentation, reproducibility, interview demonstration | Planned |
+
+Details, acceptance criteria, and the commit plan are in
+[docs/development_plan.md](docs/development_plan.md).
+
+## Documentation
+
+- [Architecture](docs/architecture.md): system design, package boundaries, artifacts, trade-offs
+- [ML protocol](docs/ml_protocol.md): data splits, leakage rules, metrics, comparison method
+- [Development plan](docs/development_plan.md): phases, acceptance criteria, exclusions, commits
+
+## Planned technology
+
+Python 3.12, scikit-learn, sentence-transformers, pandas, NumPy, FastAPI, Pydantic, Streamlit,
+pytest, Ruff, mypy, Docker, GitHub Actions. Dependencies are added only in the phase that needs
+them.
+
+## Dataset attribution
+
+This project uses **BANKING77**, created by PolyAI:
+
+- Dataset card: <https://huggingface.co/datasets/PolyAI/banking77>
+- Original release: <https://github.com/PolyAI-LDN/task-specific-datasets>
+- Paper: Iñigo Casanueva, Tadas Temčinas, Daniela Gerz, Matthew Henderson, Ivan Vulić.
+  *Efficient Intent Detection with Dual Sentence Encoders.* Proceedings of the 2nd Workshop on
+  NLP for Conversational AI (ACL 2020). <https://arxiv.org/abs/2003.04807>
+
+BANKING77 is distributed under the Creative Commons Attribution 4.0 (CC BY 4.0) license. This
+repository will not redistribute the raw dataset. It will be downloaded from the source at
+pipeline run time.
+
+## License
+
+A project license has not been chosen yet. It will be added before the public deployment
+(Phase 6).
