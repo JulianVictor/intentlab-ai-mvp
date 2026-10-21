@@ -25,7 +25,7 @@ code.
 
 **Deliverables**
 - README, [architecture.md](architecture.md), [ml_protocol.md](ml_protocol.md), and this plan.
-- A src-layout package skeleton (`src/intentlab/`), `pyproject.toml`, `.gitignore`, and
+- A src-layout package skeleton (`src/intentlab_ai/`), `pyproject.toml`, `.gitignore`, and
   Ruff/mypy/pytest configuration.
 - A minimal smoke test that imports the package.
 

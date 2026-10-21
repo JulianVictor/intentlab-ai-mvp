@@ -1,0 +1,37 @@
+# Normalize line endings in the repository; store text as LF.
+* text=auto
+
+# Source, config, and docs always use LF in the working tree, on every OS.
+*.py    text eol=lf
+*.pyi   text eol=lf
+*.toml  text eol=lf
+*.cfg   text eol=lf
+*.ini   text eol=lf
+*.md    text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+*.json  text eol=lf
+*.sh    text eol=lf
+*.txt   text eol=lf
+py.typed text eol=lf
+.gitignore     text eol=lf
+.gitattributes text eol=lf
+Dockerfile     text eol=lf
+
+# Windows-only scripts keep CRLF.
+*.ps1   text eol=crlf
+*.bat   text eol=crlf
+*.cmd   text eol=crlf
+
+# Binary files: never diff or convert.
+*.png     binary
+*.jpg     binary
+*.jpeg    binary
+*.gif     binary
+*.ico     binary
+*.pdf     binary
+*.joblib  binary
+*.pkl     binary
+*.npy     binary
+*.npz     binary
+*.parquet binary

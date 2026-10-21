@@ -60,7 +60,7 @@
    record the results.
 10. **Package.** Write the artifact directory (see §6).
 
-Each step will be a deterministic, CLI-invokable function (e.g. `python -m intentlab.train`). The
+Each step will be a deterministic, CLI-invokable function (e.g. `python -m intentlab_ai.train`). The
 exact CLI is defined in Phase 2.
 
 ## 4. Online inference flow
@@ -93,7 +93,7 @@ project has no database.
 The package will be scaffolded in Phase 0, Commit 2. The intended structure is:
 
 ```text
-src/intentlab/
+src/intentlab_ai/
   config.py          # typed settings: paths, seeds, dataset revision, class lists
   data/              # loading, subset selection, splitting, validation checks
   features/          # text normalization shared by training and inference

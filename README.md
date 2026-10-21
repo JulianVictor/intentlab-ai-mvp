@@ -83,6 +83,30 @@ Details, acceptance criteria, and the commit plan are in
 - [ML protocol](docs/ml_protocol.md): data splits, leakage rules, metrics, comparison method
 - [Development plan](docs/development_plan.md): phases, acceptance criteria, exclusions, commits
 
+## Development setup (Windows PowerShell)
+
+Requires **Python 3.12** (`>=3.12,<3.13`). Commands call the virtual environment's interpreter
+directly, which avoids PowerShell execution-policy issues with `Activate.ps1`.
+
+```powershell
+py -3.12 -m venv .venv
+.venv\Scripts\python.exe -m pip install --upgrade pip
+.venv\Scripts\python.exe -m pip install -e ".[dev]"
+```
+
+Quality checks:
+
+```powershell
+.venv\Scripts\python.exe -m pytest -q
+.venv\Scripts\python.exe -m ruff check .
+.venv\Scripts\python.exe -m ruff format --check .
+.venv\Scripts\python.exe -m mypy
+```
+
+`pyproject.toml` is the single source of project metadata, dependencies, and tool configuration.
+The package currently contains only its skeleton: the data pipeline, models, API, and demo are
+**not yet implemented**.
+
 ## Planned technology
 
 Python 3.12, scikit-learn, sentence-transformers, pandas, NumPy, FastAPI, Pydantic, Streamlit,
