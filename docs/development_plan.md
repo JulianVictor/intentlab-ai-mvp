@@ -63,8 +63,9 @@ Phase 1 starts only after Phase 0 CI is in place and passing.
   IDs/hashes.
 - Data validation checks: schema, class coverage, empty text, and exact and near-duplicates
   across splits.
-- A short EDA report: class counts, text-length distribution, duplicate findings, and
-  confusable intent pairs.
+- A short **training-split-only** EDA report: class counts, text-length distribution,
+  within-train duplicate findings, and candidate intent-name overlap
+  ([data_exploration.md](data_exploration.md)).
 
 **Acceptance criteria**
 - Re-running the split produces identical membership (verified by a test).
@@ -77,6 +78,11 @@ Phase 1 starts only after Phase 0 CI is in place and passing.
 
 **Progress**
 - Commit 1.1: verified BANKING77 ingestion (done).
+- Commit 1.2: reproducible training-set EDA (`intentlab_ai.data.eda`,
+  `scripts/analyze_banking77.py`, [data_exploration.md](data_exploration.md)). This uses
+  training data only. The intent subset is not frozen (done).
+- Next, Commit 1.3: freeze the supported-intent subset and the OOS-dev/OOS-test groups,
+  following protocol §2.
 
 ## Phase 2: TF-IDF + Logistic Regression baseline
 
@@ -211,10 +217,10 @@ Small, atomic commits. Each one leaves the repository in a passing state.
 
 **Phase 1**
 4. `feat(data): implement verified BANKING77 ingestion`
-5. `feat(data): add intent subset and OOS group configuration`
-6. `feat(data): add deterministic stratified splitter`
-7. `feat(data): add leakage and duplicate validation checks`
-8. `docs(data): add EDA report and finalized split rationale`
+5. `feat(data): add reproducible training-set EDA`
+6. `feat(data): add intent subset and OOS group configuration`
+7. `feat(data): add deterministic stratified splitter`
+8. `feat(data): add leakage and duplicate validation checks`
 
 **Phase 2**
 9. `feat(features): add shared text normalization`

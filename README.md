@@ -66,7 +66,7 @@ The demo calls the same FastAPI service that a programmatic client would use.
 | Phase | Focus | Status |
 |---|---|---|
 | 0 | Project foundation and architecture | Done |
-| 1 | Dataset preparation, EDA, validation strategy | **In progress** (ingestion done) |
+| 1 | Dataset preparation, EDA, validation strategy | **In progress** (ingestion and training-set EDA done) |
 | 2 | TF-IDF + Logistic Regression baseline | Planned |
 | 3 | Frozen sentence-embedding challenger | Planned |
 | 4 | Evaluation, calibration, abstention, model comparison | Planned |
@@ -82,6 +82,7 @@ Details, acceptance criteria, and the commit plan are in
 - [Architecture](docs/architecture.md): system design, package boundaries, artifacts, trade-offs
 - [ML protocol](docs/ml_protocol.md): data splits, leakage rules, metrics, comparison method
 - [Development plan](docs/development_plan.md): phases, acceptance criteria, exclusions, commits
+- [Data exploration](docs/data_exploration.md): training-split EDA findings and subset considerations
 
 ## Development setup (Windows PowerShell)
 
@@ -148,6 +149,25 @@ library.
 
 Full provenance and the checksum policy are documented in
 [docs/ml_protocol.md](docs/ml_protocol.md#1-dataset-provenance).
+
+### Training-set exploratory analysis
+
+```powershell
+.venv\Scripts\python.exe scripts\analyze_banking77.py
+```
+
+This command is offline and needs the verified cache. It reads **only** the official training
+CSV, never `test.csv`, and writes a deterministic JSON report to
+`reports/generated/banking77_train_eda.json` (git-ignored). The report covers:
+
+- class frequencies
+- text-length statistics
+- exact and normalized duplicates
+- data-quality indicators
+- candidate intent-name overlap (a lexical heuristic, not a measured confusion)
+
+The findings and their implications for choosing the supported intents are summarized in
+[docs/data_exploration.md](docs/data_exploration.md).
 
 ## Planned technology
 

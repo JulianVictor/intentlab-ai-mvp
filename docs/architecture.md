@@ -100,6 +100,7 @@ marked as implemented exist so far.
 src/intentlab_ai/
   config.py          # typed settings: paths, seeds, dataset revision, class lists
   data/              # banking77.py: verified raw ingestion (implemented);
+                     # eda.py: training-split EDA (implemented);
                      # subset selection, splitting, validation checks (planned)
   features/          # text normalization shared by training and inference
   models/            # baseline and challenger estimators behind one small interface
