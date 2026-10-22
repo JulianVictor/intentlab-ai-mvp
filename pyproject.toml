@@ -19,6 +19,8 @@ dependencies = [
     # Phase 2: baseline model. joblib is imported directly for artifact persistence.
     # scikit-learn is pinned to a minor series: defaults and pickles change between minors.
     "joblib>=1.4,<2",
+    # Phase 2.2: imported directly by the evaluation bootstrap.
+    "numpy>=2.0,<3",
     "scikit-learn>=1.9,<1.10",
 ]
 

@@ -308,3 +308,17 @@ def load_trusted_artifact(artifact_dir: Path) -> tuple[Any, dict[str, Any]]:
     pipeline = joblib.load(model_path)
     verify_classes(pipeline, metadata.get("supported_classes", []))
     return pipeline, metadata
+
+
+def check_artifact_provenance(metadata: Mapping[str, Any], expected: Mapping[str, object]) -> None:
+    """Require every expected provenance field to match the artifact metadata exactly."""
+    mismatched = {
+        key: (metadata.get(key), value)
+        for key, value in expected.items()
+        if metadata.get(key) != value
+    }
+    if mismatched:
+        details = "; ".join(
+            f"{k}: artifact {a!r} != expected {e!r}" for k, (a, e) in mismatched.items()
+        )
+        raise BaselineError(f"model artifact provenance mismatch: {details}")

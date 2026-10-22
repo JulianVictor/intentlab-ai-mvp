@@ -123,8 +123,14 @@ Phase 1 starts only after Phase 0 CI is in place and passing.
   - See [baseline_model.md](baseline_model.md).
 - No hyperparameter grid has been searched yet. If one is used, it must be declared before it
   is run, and it is searched on `id_train` / `id_validation` only.
-- Next, Commit 2.2: per-class metrics, confusion matrix, bootstrap intervals, and error
-  analysis on `id_validation`.
+- Commit 2.2: read-only evaluation on `id_validation` (done). See
+  [baseline_evaluation.md](baseline_evaluation.md).
+  - Contents: per-class metrics, raw and normalized confusion matrices, directional and
+    bidirectional confusions, the pre-declared pairs, length bins, and class-stratified bootstrap
+    95% intervals.
+  - Measured: macro-F1 0.8706, interval [0.8283, 0.9070]. 13 of 35 errors cross product family,
+    and 11 of those keep the same state.
+  - The artifact was regenerated from clean commit `ba0453c`, with identical metrics.
 
 ## Phase 3: Frozen sentence-embedding challenger
 
@@ -252,8 +258,8 @@ Small, atomic commits. Each one leaves the repository in a passing state.
 **Phase 2**
 9. `feat(ml): implement TF-IDF logistic regression baseline` (pipeline, manifest loader,
    trusted artifact, training CLI, leakage-audit appendix)
-10. `feat(eval): add baseline validation analysis` (per-class metrics, confusion matrix,
-    bootstrap CIs)
+10. `feat(eval): add baseline metrics and error analysis` (per-class metrics, confusion
+    matrices, bootstrap CIs, pair and length diagnostics)
 11. (reserved: pre-declared baseline hyperparameter grid, if adopted)
 12. (reserved)
 

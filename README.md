@@ -10,7 +10,8 @@ calibration, uncertainty, and abstention as primary concerns rather than afterth
 > - project foundation and CI
 > - verified BANKING77 ingestion and training-only EDA
 > - the frozen intent taxonomy and frozen development partitions
-> - a fixed TF-IDF + Logistic Regression baseline, evaluated on in-scope validation data only
+> - a fixed TF-IDF + Logistic Regression baseline, with per-class, confusion, and bootstrap
+>   evaluation on in-scope validation data only
 >
 > There is no calibration, abstention, OOS evaluation, challenger, API, or demo yet. No test
 > result exists.
@@ -73,7 +74,7 @@ The demo calls the same FastAPI service that a programmatic client would use.
 |---|---|---|
 | 0 | Project foundation and architecture | Done |
 | 1 | Dataset preparation, EDA, validation strategy | Done |
-| 2 | TF-IDF + Logistic Regression baseline | **In progress** (fixed baseline trained) |
+| 2 | TF-IDF + Logistic Regression baseline | **In progress** (baseline trained and evaluated) |
 | 3 | Frozen sentence-embedding challenger | Planned |
 | 4 | Evaluation, calibration, abstention, model comparison | Planned |
 | 5 | FastAPI service and Streamlit demo | Planned |
@@ -92,6 +93,7 @@ Details, acceptance criteria, and the commit plan are in
 - [Intent taxonomy](docs/intent_taxonomy.md): the frozen supported intents and out-of-scope groups
 - [Data partitions](docs/data_partitions.md): the frozen split policy, partition counts, and leakage checks
 - [Baseline model](docs/baseline_model.md): the TF-IDF + Logistic Regression design, provenance, and validation results
+- [Baseline evaluation](docs/baseline_evaluation.md): per-class metrics, confusions, bootstrap intervals, and length diagnostics
 
 ## Development setup (Windows PowerShell)
 
@@ -246,6 +248,21 @@ partitions:
 
 - **Raw scores are not calibrated probabilities.** See
   [docs/baseline_model.md](docs/baseline_model.md).
+
+### Baseline evaluation (validation only, read-only)
+
+```powershell
+.venv\Scripts\python.exe scripts\evaluate_baseline.py
+```
+
+- **What it does:** loads the checksum-verified artifact and reconstructs `id_validation` from
+  the frozen manifest. It predicts without fitting and writes a deterministic, text-free report
+  to `reports/generated/baseline_evaluation.json` (git-ignored).
+- **Measured results:**
+  - Macro-F1 0.8706, 95% bootstrap interval [0.8283, 0.9070] (3,000 class-stratified
+    replicates, seed 42).
+  - The most frequent error is `card_payment_fee_charged` → `transfer_fee_charged` (5 of 28).
+- **Details:** see [docs/baseline_evaluation.md](docs/baseline_evaluation.md).
 
 ## Planned technology
 

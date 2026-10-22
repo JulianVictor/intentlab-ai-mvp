@@ -1,0 +1,30 @@
+{
+  "evaluation_config_version": "1.0.0",
+  "description": "Pre-declared validation analysis for the baseline. Fixed before inspecting per-class or pair results; not changed in response to them.",
+  "partition": "id_validation",
+  "zero_division": 0.0,
+  "top_confusions": 10,
+  "bootstrap": {
+    "replicates": 3000,
+    "random_seed": 42,
+    "confidence_level": 0.95,
+    "method": "class-stratified percentile bootstrap: within each true intent, resample that intent's validation indices with replacement at its original count; recompute accuracy and macro-F1 on every replicate"
+  },
+  "confusable_pairs": [
+    ["failed_transfer", "declined_transfer"],
+    ["pending_transfer", "transfer_timing"],
+    ["pending_transfer", "pending_card_payment"],
+    ["declined_transfer", "declined_card_payment"],
+    ["transfer_fee_charged", "card_payment_fee_charged"]
+  ],
+  "length_bins": {
+    "source": "training-only EDA character-length quartiles (p25 = 36, median = 47, p75 = 64)",
+    "measure": "len() of the original unmodified text",
+    "bins": [
+      {"name": "short", "min_chars": 0, "max_chars": 36},
+      {"name": "medium_short", "min_chars": 37, "max_chars": 47},
+      {"name": "medium_long", "min_chars": 48, "max_chars": 64},
+      {"name": "long", "min_chars": 65, "max_chars": null}
+    ]
+  }
+}

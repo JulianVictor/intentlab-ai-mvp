@@ -106,7 +106,8 @@ src/intentlab_ai/
   features/          # text normalization shared by training and inference
   models/            # baseline.py: TF-IDF + LR pipeline, trusted artifacts (implemented);
                      # challenger (planned)
-  evaluation/        # classification metrics, calibration, risk–coverage, OOS metrics, reports
+  evaluation/        # classification.py: metrics, confusions, bootstrap CIs (implemented);
+                     # calibration, risk–coverage, OOS metrics (planned)
   inference/         # artifact loading, Predictor, abstention policy
   api/               # FastAPI app, Pydantic request/response schemas
 app/
@@ -116,6 +117,7 @@ config/
   intent_taxonomy.json  # frozen supported/OOS intent groups (single source of truth)
   split_policy.json     # frozen partition policy: fractions, seed, algorithm, pins
   baseline_model.json   # fixed baseline hyperparameters + pinned split manifest
+  baseline_evaluation.json  # pre-declared evaluation settings: pairs, length bins, bootstrap
 tests/               # unit and integration tests
 artifacts/           # generated model artifacts (git-ignored)
 reports/             # generated evaluation reports (small summaries may be committed)

@@ -140,8 +140,13 @@ committed.
 - versions: Python 3.12.10, scikit-learn 1.9.1, NumPy 2.5.4, SciPy 1.18.1, joblib 1.6.0
 - vocabulary size, iteration count, git commit, and a dirty flag
 
-The documented run was made from `4738cc0` with uncommitted Commit 2.1 changes, and its metadata
-records `dirty: true`. Re-running after this commit records a clean commit.
+The original Commit 2.1 run was made from `4738cc0` with uncommitted changes, and its metadata
+recorded `dirty: true`. In Commit 2.2, the official local artifact was regenerated from the clean
+committed revision `ba0453c` (`dirty: false`), with the configuration and partitions unchanged:
+
+- Its validation metrics and prediction fingerprint are byte-identical to the original run.
+- Its model SHA-256 is `a0c2b4318c59fde653e93c1f07b64c7777cfec4b85cd27e74aefca021d328c97`.
+- See [baseline_evaluation.md](baseline_evaluation.md) §12.
 
 **Trusted loading.** `load_trusted_artifact` performs these checks before unpickling:
 
@@ -155,29 +160,37 @@ refused. Never load a joblib file from an untrusted source.
 
 - identical predictions (the same `validation_predictions_sha256`, `7d6da05c…`)
 - a byte-identical `validation_metrics.json`, so the metric tolerance is **0**
-- on the same machine and library versions, even an identical model file
+**Correction (Commit 2.2).** Commit 2.1 also reported an identical model file on the same
+machine. That turned out to hold only by chance. The pickled bytes can differ between processes
+because scikit-learn's private `TfidfVectorizer._stop_words_id` stores the process memory address
+`id()` of the `stop_words` setting.
 
-Binary model identity is not required across operating systems or library versions. The
-deterministic metrics report and prediction fingerprint are the reproducibility contract.
+- All learned parameters are identical across runs: the vocabulary (including key order), IDF
+  weights, coefficients, and intercepts.
+- Binary model identity is therefore **not** required, even on one machine.
+- The deterministic metrics report and the prediction fingerprint are the reproducibility
+  contract.
 
 ## 10. Limitations
 
 - **One fixed configuration** with no hyperparameter search. A tuned baseline might score higher.
-- **Small validation set:** 17 to 28 examples per intent, and no intervals or per-class
-  breakdown yet.
+- **Small validation set:** 17 to 28 examples per intent. The 95% bootstrap interval for
+  macro-F1 is [0.8283, 0.9070]; see [baseline_evaluation.md](baseline_evaluation.md).
 - **Lexical features only.** Paraphrases with no shared n-grams generalize poorly. That gap is
   what the frozen-embedding challenger (Phase 3) tests.
 - **No abstention yet.** The model always outputs one of the 12 intents, including for
   out-of-scope input.
 - **Version-specific artifacts.** Pickled artifacts are tied to the library versions above.
 
-## 11. Planned deeper evaluation (Commit 2.2)
+## 11. Deeper evaluation (done in Commit 2.2)
 
-- Per-class precision, recall, and F1.
-- A confusion matrix, both raw and row-normalized.
-- Bootstrap 95% confidence intervals for macro-F1 and accuracy.
-- Error analysis of the confusable pairs from [intent_taxonomy.md](intent_taxonomy.md) §6,
-  including the length-shortcut check from the EDA.
+Commit 2.2 added the following, all on `id_validation` only:
 
-All of this stays on `id_validation` only. There is still no calibration, threshold, OOS, or
-test evaluation.
+- per-class precision, recall, and F1
+- raw and row-normalized confusion matrices
+- class-stratified bootstrap 95% intervals
+- analysis of the pre-declared confusable pairs
+- character-length diagnostics
+
+See [baseline_evaluation.md](baseline_evaluation.md). There is still no calibration, threshold,
+OOS, or test evaluation.
